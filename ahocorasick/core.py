@@ -10,10 +10,13 @@ import os
 
 class node(object):
     def __init__(self):
-        self.next = {}  # 相当于指针，指向树节点的下一层节点
-        self.fail = None  # 失配指针，这个是AC自动机的关键
-        self.isWord = False  # 标记，用来判断是否是一个标签的结尾
-        self.word = ""  # 用来储存标签
+        """
+        数据结构。
+        """
+        self.next = {}  # 指向下一层节点
+        self.fail = None  # 失配指针
+        self.isWord = False  # 判断是否是标签结尾
+        self.word = ""  # 储存标签
 
 
 class Automaton(object):
@@ -21,7 +24,6 @@ class Automaton(object):
 
     def __init__(self, path=''):
         """
-        path: 词表文件路径。
         词表格式：一行一个词语，可用空格或制表符分开为多个部分，第一部分是key，其他的是value。
         key即为需要检索的词语。
         例如：
@@ -29,6 +31,7 @@ class Automaton(object):
         自动机\n
 
         key和value分别是：{'AC': '1\t字母', '自动机': None}
+        :param path: 词表文件路径。
         """
         self.root = node()
         self.word_dict = {}
@@ -36,7 +39,12 @@ class Automaton(object):
         self.make_automaton()
 
     def _add_word(self, key, value=None) -> bool:
-        """"""
+        """
+        添加词语到自动机。
+        :param key:
+        :param value:
+        :return:
+        """
         self.word_dict[key] = value
         temp_root = self.root
         for char in key:
@@ -48,6 +56,10 @@ class Automaton(object):
         return True
 
     def _make_automaton(self):
+        """
+        生成自动机，主要用于直接用词表文件初始化自动机的场景。
+        :return:
+        """
         if not os.path.isfile(self.user_dict_path):
             return
         with open(self.user_dict_path, "rt", encoding="utf-8") as fin:
@@ -56,6 +68,10 @@ class Automaton(object):
                 self.add_word(*parts)
 
     def _make_fail(self):
+        """
+        失配指针逻辑。
+        :return:
+        """
         temp_que = []
         temp_que.append(self.root)
         while len(temp_que) != 0:
@@ -76,7 +92,16 @@ class Automaton(object):
                 temp_que.append(temp.next[key])
 
     def _iter(self, string, return_span=False):
-
+        """
+        迭代搜索。
+        if return_span == False:
+            return pyahocorssick默认返回的是：(end_index, value)。
+        else:
+            return 起止位置的范围：(start_index, end_index + 1)，类似正则表达式的finditer方法的span。
+        :param string:
+        :param return_span:
+        :return:
+        """
         content = string
         p = self.root
         result = set()
@@ -107,25 +132,39 @@ class Automaton(object):
             index += 1
         return result
 
-    def search(self, string):
-        return [(k, v) for k, v in self.iter(string, return_span=True)]
+    def search(self, string: str) -> list:
+        """
+        搜索敏感词。
+        :param string:
+        :return: 起止位置列表，eg. [(1,3), (2,5)]。
+        """
+        return [(k, v) for k, v in self._iter(string, return_span=True)]
 
     def add_word(self, key, value=None) -> bool:
-        """"""
+        """
+        添加敏感词。
+        :param key:
+        :param value:
+        :return:
+        """
         return self._add_word(key, value)
 
     def make_automaton(self):
-        """"""
+        """
+        构建自动机。
+        :return:
+        """
         self._make_automaton()
 
-    def iter(self, string, ignore_white_space=False, return_span=False):
+    def iter(self, string, ignore_white_space=False):
         """
-        if return_span == False:
-            return pyahocorssick默认返回的是：(end_index, value)。
-        else:
-            return 起止位置的范围：(start_index, end_index + 1)，类似正则表达式的finditer方法的span。
+        迭代搜索敏感词。
+        :param string:
+        :param ignore_white_space:
+        :param return_span:
+        :return:
         """
-        return self._iter(string, return_span=return_span)
+        return self._iter(string, return_span=False)
 
     def get(self, key):
         """
@@ -162,7 +201,7 @@ class Automaton(object):
         return key in self.word_dict
 
     def longest_prefix(self, string) -> int:
-        """
+        """暂不支持。
         >>> import ahocorasick
         >>> A = ahocorasick.Automaton()
         >>> A.add_word("he", True)
@@ -178,7 +217,7 @@ class Automaton(object):
         """
 
     def match(self, key) -> bool:
-        """
+        """暂不支持。
         >>> import ahocorasick
         >>> A = ahocorasick.Automaton()
         >>> A.add_word("example", True)
@@ -245,23 +284,33 @@ class Automaton(object):
         """"""
 
     def find_all(self, string, callback=None):
-        """"""
+        """
+        查找所有敏感词。
+        :param string:
+        :param callback:
+        :return:
+        """
         if callback is None:
             return list(self.iter(string))
         else:
             return [callback(w) for w in self.iter(string)]
 
-    # def __reduce__(self):
-    #     """"""
-
     def save(self, path):
-        """pickle.dumps"""
+        """
+        保存模型。
+        :param path:
+        :return:
+        """
         import pickle
         with open(path, 'wb') as fout:
             pickle.dump(self, fout)
 
     def load(self, path):
-        """"""
+        """
+        加载模型。
+        :param path:
+        :return:
+        """
         import pickle
         with open(path, 'rb') as fin:
             return pickle.load(fin)
@@ -270,7 +319,10 @@ class Automaton(object):
         """"""
 
     def dump(self):
-        """"""
+        """
+        序列化模型。
+        :return:
+        """
         import pickle
         return pickle.dumps(self)
 
@@ -278,19 +330,29 @@ class Automaton(object):
         """"""
 
 
-if __name__ == "__main__":
-    print(__file__)
+def test_case():
+    from unittest import TestCase
+    T = TestCase()
     M = Automaton()
     for i, w in enumerate('ab bc bcd'.split()):
         M.add_word(w, (i, w))
 
     string = 'a12bcd34'
-    for w in M.iter(string):
-        print(w)
-        # (4, (1, 'bc'))
 
-    print(M.find_all(string))
-    # [(4, (1, 'bc')), (5, (2, 'bcd')), (4, (1, 'bc')), (5, (2, 'bcd')), (4, (1, 'bc')), (5, (2, 'bcd')), (4, (1, 'bc')), (5, (2, 'bcd'))]
+    y_pred = [w for w in M.iter(string)]
+    y_true = [(4, (1, 'bc')), (5, (2, 'bcd')), (4, (1, 'bc')), (5, (2, 'bcd')), (4, (1, 'bc')), (5, (2, 'bcd')),
+              (4, (1, 'bc')), (5, (2, 'bcd'))]
+    T.assertListEqual(y_true, y_pred)
 
-    print(M.search(string))
-    # [(3, 5), (3, 6), (3, 5), (3, 6), (3, 5), (3, 6), (3, 5), (3, 6)]
+    y_pred = M.find_all(string)
+    y_true = [(4, (1, 'bc')), (5, (2, 'bcd')), (4, (1, 'bc')), (5, (2, 'bcd')), (4, (1, 'bc')), (5, (2, 'bcd')),
+              (4, (1, 'bc')), (5, (2, 'bcd'))]
+    T.assertListEqual(y_true, y_pred)
+
+    y_pred = M.search(string)
+    y_true = [(3, 5), (3, 6), (3, 5), (3, 6), (3, 5), (3, 6), (3, 5), (3, 6)]
+    T.assertListEqual(y_true, y_pred)
+
+
+if __name__ == "__main__":
+    print(__file__)

@@ -11,7 +11,7 @@ pip install ackit
 ```
 
 ## Version
-v0.1.0
+v0.1.2
 
 ## API Reference
 ```

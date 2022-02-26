@@ -3,14 +3,13 @@
 # author: kuangdd
 # date: 2019/12/15
 """
-语音处理工具箱。
 生成whl格式安装包：python setup.py bdist_wheel
 
 直接上传pypi：python setup.py sdist upload
 
 用twine上传pypi：
 生成安装包：python setup.py bdist_wheel
-上传安装包：twine upload dist/ahocorasick-0.1.0-py3-none-any.whl
+上传安装包：twine upload dist/ackit-0.1.0-py3-none-any.whl
 
 注意：需要在home目录下建立.pypirc配置文件，文件内容格式：
 [distutils]
@@ -23,16 +22,17 @@ password: admin
 """
 
 from setuptools import setup, find_packages
+from ahocorasick import __version__, __doc__ as long_desc
 
 setup(
     name="ackit",
-    version='0.1.0',
+    version=__version__,
     author="kuangdd",
     author_email="kuangdd@foxmail.com",
     description="simple and pure python package and like pyahocorasick.",
-    long_description="ackit(aho-corasick kit) is a simple and pure python package and its method like pyahocorasick.",
+    long_description=long_desc,
     long_description_content_type="text/markdown",
-    url="https://github.com/KuangDD/aho-corasick",
+    url="https://github.com/KuangDD/ackit",
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     install_requires=[],  # 指定项目最低限度需要运行的依赖项
     python_requires='>=3.5',  # python的依赖关系
